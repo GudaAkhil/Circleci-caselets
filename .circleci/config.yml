@@ -44,7 +44,7 @@ jobs:
             zip -r inventory.zip .
             cp inventory.zip /tmp/artifacts
       - store_artifacts:
-          path: /tmp/artifacts/inventory.zip
+          path: /tmp/artifacts
 
   parallel-tests:
     docker:
@@ -101,7 +101,7 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "40 16 * * *"
+          cron: "41 16 * * *"
           filters:
             branches:
               only: main

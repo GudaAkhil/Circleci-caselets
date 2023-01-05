@@ -60,7 +60,7 @@ jobs:
           command: |
             pip install pytest
             python billing_system.py
-            python -m pytest
+            pytest
     parallelism: 2
 
   sequential-tests:
@@ -74,7 +74,7 @@ jobs:
           command: |
             pip install pytest
             python billing_system.py
-            python -m pytest
+            pytest
 
 workflows:
   version: 2

@@ -47,18 +47,15 @@ jobs:
           path: /tmp/artifacts
 
   parallel-tests:
-    docker:
-      - image: cimg/python:3.11.1
+    # docker:
+    #   - image: cimg/python:3.11.1
+    machine: true
     working_directory: ~/repo
     steps:
       - checkout
       - run:
           name: Run Tests Parallely
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
             python billing_system.py
             TEST=$(circleci tests glob "test_*.py" | circleci tests split)
             python $TEST
@@ -101,7 +98,7 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "41 16 * * *"
+          cron: "0 17 * * *"
           filters:
             branches:
               only: main

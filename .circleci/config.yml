@@ -83,7 +83,7 @@ workflows:
   build-on-push-1:
     jobs:
       - build
-      - parallel-tests
+      - parallel-tests:
           requires:
             - build
       - hold:
@@ -102,7 +102,7 @@ workflows:
                 - main
     jobs:
       - build-cache
-      - sequential-tests
+      - sequential-tests:
           requires:
             - build-cache
       - hold:

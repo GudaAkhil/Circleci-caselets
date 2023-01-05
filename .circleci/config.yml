@@ -60,7 +60,8 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
             python billing_system.py
-            circleci tests glob "python test_billing_system_1.py" "python test_billing_system_2.py" | circleci tests split
+            TEST=$(circleci tests glob "test_*.py" | circleci tests split)
+            python $TEST
     parallelism: 2
 
   sequential-tests:
@@ -89,11 +90,14 @@ workflows:
       - parallel-tests:
           requires:
             - build
-      - hold:
+      - approve:
           type: approval
           requires:
             - build
             - parallel-tests
+      - upload-artifacts:
+          requires:
+            - approve
   
   second-workflow:
     triggers:
@@ -108,8 +112,11 @@ workflows:
       - sequential-tests:
           requires:
             - build-cache
-      - hold:
+      - approve:
           type: approval
           requires:
             - build-cache
             - sequential-tests
+      - upload-artifacts:
+          requires:
+            - approve

@@ -41,7 +41,8 @@ jobs:
       - run:
           name: Create artifacts
           command: |
-            zip -r /tmp/artifacts/inventory.zip .
+            zip -r inventory.zip .
+            cp inventory.zip /tmp/artifacts
       - store_artifacts:
           path: /tmp/artifacts/inventory.zip
 
@@ -100,7 +101,7 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "36 16 * * *"
+          cron: "40 16 * * *"
           filters:
             branches:
               only: main

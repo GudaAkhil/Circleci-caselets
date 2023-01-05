@@ -13,6 +13,7 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
+            date
 
   build-with-cache:
     docker:

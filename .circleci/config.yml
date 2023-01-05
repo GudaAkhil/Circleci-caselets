@@ -93,7 +93,6 @@ workflows:
       - approve:
           type: approval
           requires:
-            - build
             - parallel-tests
       - upload-artifacts:
           requires:
@@ -102,7 +101,7 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "15 13 * * *"
+          cron: "*/10 * * *"
           filters:
             branches:
               only:
@@ -115,7 +114,6 @@ workflows:
       - approve:
           type: approval
           requires:
-            - build-cache
             - sequential-tests
       - upload-artifacts:
           requires:

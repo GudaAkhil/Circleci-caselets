@@ -58,9 +58,9 @@ jobs:
       - run:
           name: Run Tests Parallely
           command: |
-            pip install pytest
             python billing_system.py
-            pytest
+            python test_billing_system_1.py
+            python test_billing_system_2.py
     parallelism: 2
 
   sequential-tests:
@@ -72,9 +72,9 @@ jobs:
       - run:
           name: Run Tests Sequentially
           command: |
-            pip install pytest
             python billing_system.py
-            pytest
+            python test_billing_system_1.py
+            python test_billing_system_2py
 
 workflows:
   version: 2

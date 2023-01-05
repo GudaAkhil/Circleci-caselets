@@ -41,10 +41,9 @@ jobs:
       - run:
           name: Create artifacts
           command: |
-            zip -r inventory.zip .
-            cp inventory.zip ~/repo/artifacts
+            zip -r /tmp/artifacts/inventory.zip .
       - store_artifacts:
-          path: ~/repo/artifacts
+          path: /tmp/artifacts/inventory.zip
 
   parallel-tests:
     docker:
@@ -101,11 +100,10 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "31 16 * * *"
+          cron: "36 16 * * *"
           filters:
             branches:
-              only:
-                - main
+              only: main
     jobs:
       - build-with-cache
       - sequential-tests:

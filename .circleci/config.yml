@@ -61,6 +61,7 @@ jobs:
             pip install -r requirements.txt
             python billing_system.py
             circleci tests glob "python test_billing_system_1.py" "python test_billing_system_2.py" | circleci tests split
+      parallelism: 2
 
   sequential-tests:
     docker:
@@ -97,7 +98,7 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "10 13 * * *"
+          cron: "15 13 * * *"
           filters:
             branches:
               only:

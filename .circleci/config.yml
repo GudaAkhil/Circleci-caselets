@@ -61,7 +61,7 @@ jobs:
             pip install -r requirements.txt
             python billing_system.py
             circleci tests glob "python test_billing_system_1.py" "python test_billing_system_2.py" | circleci tests split
-      parallelism: 2
+    parallelism: 2
 
   sequential-tests:
     docker:

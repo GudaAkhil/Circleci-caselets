@@ -46,6 +46,7 @@ jobs:
   parallel-tests:
     docker:
       - image: circleci/python:3.9.6
+    working_directory: ~/repo
     steps:
       - checkout
       - run:
@@ -83,6 +84,8 @@ workflows:
     jobs:
       - build
       - parallel-tests
+          requires:
+            - build
       - hold:
           type: approval
           requires:
@@ -100,6 +103,8 @@ workflows:
     jobs:
       - build-cache
       - sequential-tests
+          requires:
+            - build-cache
       - hold:
           type: approval
           requires:

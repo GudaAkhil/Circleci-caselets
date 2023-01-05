@@ -13,10 +13,6 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
-            zip -r inventory.zip .
-            cp inventory.zip ~/repo/artifacts
-      - store_artifacts:
-          path: ~/repo/artifacts
 
   build-cache:
     docker:
@@ -24,25 +20,31 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
       - run:
           name: Install Dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip install --upgrade pip
             pip install -r requirements.txt
-            zip -r inventory.zip .
-            cp inventory.zip ~/repo/artifacts
-      - store_artifacts:
-          path: ~/repo/artifacts
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+  upload-artifacts:
+    docker:
+      - image: cimg/python:3.11.1
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Upload Artifacts
+          command: |
+            zip -r inventory.zip .
+            cp inventory.zip ~/repo/artifacts
+      - store_artifacts:
+          path: ~/repo/artifacts
 
   parallel-tests:
     docker:
@@ -50,18 +52,15 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
       - run:
           name: Run Tests Parallely
           command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
             python billing_system.py
-            python test_billing_system_1.py
-            python test_billing_system_2.py
-    parallelism: 2
+            circleci tests glob "python test_billing_system_1.py" "python test_billing_system_2.py" | circleci tests split
 
   sequential-tests:
     docker:
@@ -69,12 +68,17 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: Run Tests Sequentially
           command: |
             python billing_system.py
             python test_billing_system_1.py
-            python test_billing_system_2py
+            python test_billing_system_2.py
 
 workflows:
   version: 2
@@ -86,6 +90,7 @@ workflows:
             - build
       - hold:
           type: approval
+          name: Approve
           requires:
             - build
             - parallel-tests
@@ -93,7 +98,7 @@ workflows:
   build-on-push-2:
     triggers:
       - schedule:
-          cron: "0 17 * * *"
+          cron: "10 13 * * *"
           filters:
             branches:
               only:
@@ -105,6 +110,7 @@ workflows:
             - build-cache
       - hold:
           type: approval
+          name: Approve
           requires:
             - build-cache
             - sequential-tests

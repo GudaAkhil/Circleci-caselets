@@ -1,0 +1,102 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.9.6
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            zip -r inventory.zip .
+            cp inventory.zip ~/repo/artifacts
+      - store_artifacts:
+          path: ~/repo/artifacts
+
+  build-cache:
+    docker:
+      - image: circleci/python:3.9.6
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Install Dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            zip -r inventory.zip .
+            cp inventory.zip ~/repo/artifacts
+      - store_artifacts:
+          path: ~/repo/artifacts
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+  parallel-tests:
+    machine: true
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Run Tests Parallely
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            cd ~/repo
+            pip install -r requirements.txt
+            python billing_system.py
+            python -m pytest
+    parallelism: 2
+
+  sequential-tests:
+    machine: true
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Run Tests Sequentially
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            cd ~/repo
+            pip install -r requirements.txt
+            python billing_system.py
+            python -m pytest
+
+workflows:
+  version: 2
+  build-on-push-1:
+    jobs:
+      - build
+      - parallel-tests
+      - hold:
+          type: approval
+          requires:
+            - build
+            - parallel-tests
+  
+  build-on-push-2:
+    triggers:
+      - schedule:
+          cron: "0 17 * * *"
+    jobs:
+      - build-cache
+      - sequential-tests
+      - hold:
+          type: approval
+          requires:
+            - build-cache
+            - sequential-tests

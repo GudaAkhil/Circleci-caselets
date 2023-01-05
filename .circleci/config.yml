@@ -41,7 +41,8 @@ jobs:
       - run:
           name: Publish Artifacts
           command: |
-            zip -r ~/repo/artifacts/inventory.zip .
+            zip -r inventory.zip .
+            cp inventory.zip ~/repo/artifacts
       - store_artifacts:
           path: ~/repo/artifacts
 

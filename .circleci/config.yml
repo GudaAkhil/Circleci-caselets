@@ -13,7 +13,6 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
-            date
 
   build-with-cache:
     docker:
@@ -96,7 +95,7 @@ workflows:
   second-workflow:
     triggers:
       - schedule:
-          cron: "0 17 * * *"
+          cron: "55 15 * * *"
           filters:
             branches:
               only: main
